@@ -1,0 +1,13 @@
+services:
+  game-catalog-mysql:
+    image: mysql:latest
+    container_name: game-catalog-mysql
+    env_file:
+    - .env
+    ports:
+      - 3307:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+    
+volumes:
+  mysql-data:

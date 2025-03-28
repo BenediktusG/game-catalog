@@ -1,0 +1,1001 @@
+openapi: '3.0.3'
+info:
+  title: Game Catalog
+  description: Game Catalog RESTful API
+  version: '1.0.0'
+  contact:
+    name: 'Benediktus Gianto Jarod'
+    email: 'benediktus.gianto.jarod@gmail.com'    
+servers:
+  - url: https://localhost:3000/
+    description: Game Catalog RESTful API Server
+    
+paths:
+  /users:
+    get:
+      tags:
+        - Users
+      description: Get all users
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Successfully got all users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: 
+                              type: string
+                            email: 
+                              type: string
+                              format: email
+                            username:
+                              type: string
+                            fullName:
+                              type: string
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        403:
+          description: 'Unauthorized action'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+    post:
+      tags:
+        - Users
+      summary: 'Create a new user'
+      description: 'Create a new user'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - fullName
+                - password
+              properties:
+                username:
+                  type: string
+                  minLength: 4
+                  maxLength: 20
+                  pattern: "^[a-zA-Z0-9_]+$"
+                email:
+                  type: string
+                  format: email
+                fullName:
+                  type: string
+                  minLength: 3
+                  maxLength: 50
+                  pattern: "^[a-zA-Z ]+$"
+                password:
+                  type: string
+                  minLength: 8
+                  pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+      responses:
+        201:
+          description: 'Success create a new user'
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/detailedUserInformationSchema'
+        400:
+          description: 'Failed create a new user because of invalid body'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        409:
+          description: 'Failed create a new user because the username have been already taken'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+  /users/{userId}:
+    get:
+      tags:
+      - Users
+      summary: Get user information
+      description: Get detailed information about a user by its id
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        200:
+          description: 'Successfully got specific user information'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/detailedUserInformationSchema'
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        403:
+          description: 'Unauthorized action'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        404:
+          description: 'Not Found User'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+    patch:
+      tags:
+      - Users
+      summary: Update user's information
+      description: Update specific user's information by it's Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 4
+                  maxLength: 20
+                  pattern: "^[a-zA-Z0-9_]+$"
+                email:
+                  type: string
+                  format: email
+                fullName:
+                  type: string
+                  minLength: 3
+                  maxLength: 50
+                  pattern: "^[a-zA-Z ]+$"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        200:
+          description: Successfully update user's information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/detailedUserInformationSchema'
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        403:
+          description: 'Unauthorized action'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        404:
+          description: 'Not Found User'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        409:
+          description: 'Username already exist'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+    delete:
+      tags: 
+      - Users
+      summary: Delete an user
+      description: Delete an user by using its Id
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        200:
+          description: Success delete an user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        403:
+          description: 'Unauthorized action'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        404:
+          description: 'Not Found User'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        
+  /users/{userId}/password:
+    patch:
+      tags:
+      - Users
+      summary: Change user's password
+      description: Change user's password by it's id
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object  
+              properties:
+                oldPassword: 
+                  type: string
+                  minLength: 8
+                  pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+                newPassword:
+                  type: string
+                  minLength: 8
+                  pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+      responses:
+        200:
+          description: Successfully changed user password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        400:
+          description: Invalid old password or new password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        403:
+          description: Unauthorized action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        404:
+          description: Invalid user's Id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+
+  /authentications:
+    post:
+      tags:
+        - Users
+      summary: 'Authenticate a user account'
+      description: 'Authenticate a user and generate an access token'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 4
+                  maxLength: 20
+                  pattern: "^[a-zA-Z0-9_]+$"
+                password:
+                  type: string
+                  minLength: 8
+                  pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+      responses:
+        200:
+          description: 'User successfully logged in'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        format: token
+        401:
+          description: 'Failed login caused by invalid credentials'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+    delete:
+      tags:
+      - Users
+      summary: 'User log out'
+      description: 'Logging out user by deleting user access token'
+      security:
+        - bearerAuth: []
+      
+      responses:
+        200:
+          description: User successfully logged out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+
+  /games:
+    get:
+      tags: 
+      - Games
+      summary: 'Get all games'
+      description: 'Get list of the games in the Games Catalog'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        description: pagination page query
+        schema:
+          type: integer
+          default: 1
+      - name: limit
+        in: query
+        required: false
+        description: pagination limit query
+        schema:
+          type: integer
+          default: 10
+
+      responses:
+        200:
+          description: 'Successfully get all the games'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      games:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: 
+                              type: string
+                            name:
+                              type: string
+                            price:
+                              type: number
+                              format: float
+
+    post:
+      tags:
+      - Games
+      summary: 'Post a games'
+      description: Post a game into the game Catalog
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postOrPutGameRequestBodySchema'
+      responses:
+        200:
+          description: 'Success post a game'
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/detailedGameResponseSchema'
+        400:
+          description: Cannot post the game because of invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'      
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+  /games/{gameId}:
+    get:
+      tags:
+      - Games
+      summary: 'Get detail game information'
+      description: 'Get a specific information about game by its Id'
+      parameters:
+        - $ref: '#/components/parameters/gameId'
+      responses:
+        200:
+          description: Successfully get detailed information about the game
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/detailedGameResponseSchema'
+        404:
+          description: Cannot find the game because of invalid Game Id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+  
+    put:
+      tags:
+      - Games
+      summary: 'Update game information'
+      description: 'Update some information about a game by its id'
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/gameId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postOrPutGameRequestBodySchema'
+      responses:
+        200:
+          description: Successfully update information about the game
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/detailedGameResponseSchema'
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        404:
+          description: Cannot find the game because of invalid Game Id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+    delete:
+      tags:
+      - Games
+      summary: Delete a game
+      description: Delete a game by its Id
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/gameId'
+      responses:
+        200:
+          description: Successfully delete game
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        404:
+          description: Invalid Game Id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        403:
+          description: Unauthorized Action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+          
+        
+
+  /games/{gameId}/reviews:
+    post:
+      tags:
+      - Reviews
+      - Games
+      summary: Post a new game review
+      description: Enable users to post review about a specific game
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/gameId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postReviewSchema'
+      responses:
+        201:
+          description: Successfully created new review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponsePostPutSchema'
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        409:
+          description: Cannot create more than 1 review at the same game
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/simpleMessageSchema'
+        404:
+          description: Invalid Game Id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        403:
+          description: User who don't have the game cannot give a review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+    get:
+      tags:
+      - Reviews
+      - Games
+      summary: Get game reviews
+      description: Get all user reviews about a specific game by its Id
+      parameters:
+        - $ref: '#/components/parameters/gameId'
+      responses:
+        200:
+          description: Success get game rating and all of the reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      gameId:
+                        type: string
+                      gameName:
+                        type: string
+                      gameRating:
+                        type: number
+                        format: float
+                        minimum: 1
+                        maximum: 5
+                      totalReview:
+                        type: integer
+                      reviews: 
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                            rating:
+                              type: number
+                              format: float
+                              minimum: 1
+                              maximum: 5
+                            review:
+                              type: string
+                              format: text
+                            createdTime:
+                              type: string
+                              format: date-time
+        
+        404:
+          description: Invalid Game Id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+                        
+  /games/{gameId}/reviews/{reviewId}:
+    get:
+      tags:
+      - Games
+      - Reviews
+      summary: Get detailed review
+      description: Get detailed information about a specific review by its id
+      parameters:
+        - $ref: '#/components/parameters/gameId'
+        - $ref: '#/components/parameters/reviewId'
+      responses:
+        200:
+          description: Success get review
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/ReviewResponsePostPutSchema'
+
+    put:
+      tags:
+      - Games
+      - Reviews
+      summary: Edit review
+      description: Edit user review about a game by its id
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/gameId'
+        - $ref: '#/components/parameters/reviewId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postReviewSchema'
+
+      responses:
+        200:
+          description: Success edit review
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/ReviewResponsePostPutSchema'
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        404:
+          description: Not Found Review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        403:
+          description: Not owned the review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+    delete:
+      tags:
+      - Games
+      - Reviews
+      summary: Delete Review
+      description: Delete a review by its Id
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/gameId'
+        - $ref: '#/components/parameters/reviewId'
+      responses:
+        200:
+          description: Success delete review
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/simpleMessageSchema'
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        404:
+          description: Not Found Review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        403:
+          description: Not owned the review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+
+  /library:
+    post:
+      tags:
+        - Library
+      summary: Buy game
+      description: Buy game and insert it into user Library
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gameId: 
+                  type: string
+                  format: uuid
+      responses:
+        201:
+          description: Success buying game and storing it into user library
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      gameId:
+                        type: string
+                      price:  
+                        type: number
+                        format: float
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        402:
+          description: Failed buying game because of insufficient funds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+        404:
+          description: Invalid game Id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/simpleMessageSchema"
+  
+
+    get:
+      tags:
+      - Library
+      summary: Get Library Games
+      description: Get all games owned in the library
+      security:
+        - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/gameId'
+      responses:
+        200:
+          description: Success getting all library games
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      totalGame: 
+                        type: integer
+                        minimum: 0
+                      games:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            gameId:
+                              type: string
+                            gameName:
+                              type: string
+        401: 
+          description: Unauthentic user cannot access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simpleMessageSchema'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    gameId:
+      name: gameId
+      in: path
+      required: true
+      description: 'Unique Id from the games'
+      schema:
+        type: string
+        format: uuid
+        nullable: false
+    reviewId:
+      name: reviewId
+      in: path
+      required: true
+      description: The review unique id
+      schema:
+        type: string
+        format: uuid
+        nullable: false
+    userId:
+      name: userId
+      in: path
+      required: true
+      description: Unique id for user
+      schema:
+        type: string
+        format: uuid
+        nullable: false
+  schemas:
+    detailedUserInformationSchema:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+            username:
+              type: string
+            fullName:
+              type: string
+            email:
+              type: string
+              format: email
+    postOrPutGameRequestBodySchema:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9\\s\\-':]+$"
+          example: "The Legend of Zelda: Breath of the Wild"
+        price:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 9999.99
+          example: 59.99
+        description:
+          type: string
+          minLength: 10
+          maxLength: 1000
+          example: "An open-world adventure game where you explore the kingdom of Hyrule."
+    detailedGameResponseSchema:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+              id: 
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+              price:
+                type: number
+                format: float
+              releaseDate:
+                type: string
+                format: date
+              lastUpdatedDate:
+                type: string
+                format: date
+    simpleMessageSchema:
+      type: object
+      properties:
+        message:
+          type: string
+    postReviewSchema:
+      type: object
+      properties:
+        rating:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 5
+        review:
+          type: string
+          minLength: 10
+          maxLength: 1000
+          example: "Game nya jelek membosankan"
+    ReviewResponsePostPutSchema:
+      type: object
+      properties:
+        message:
+          type: string
+        data: 
+          type: object
+          properties:
+            id:
+              type: string
+            userId:
+              type: string
+            gameId:
+              type: string
+            rating:
+              type: number
+              format: float
+              minimum: 1
+              maximum: 5
+            reviews:
+              type: string
+              format: text
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+
+
+          
+                
